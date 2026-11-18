@@ -24,6 +24,8 @@ def test_sort_stable():
 
 
 # ===== v2 契约测试：初始全部失败，实现后必须通过 =====
+import particle  # noqa: E402
+
 
 
 def test_lifecycle_recycles_and_slot_reusable():

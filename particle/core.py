@@ -13,14 +13,12 @@ class Particle:
     order: int = 0
 
 
-def Particle:
-    """class"""
-    raise NotImplementedError("Particle 尚未实现")
 
 
-def Pool:
-    """class"""
-    raise NotImplementedError("Pool 尚未实现")
+class Pool:
+
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError("Pool 尚未实现")
 
 
 def spawn(pool, spec):
