@@ -98,3 +98,18 @@ class Pool:
     def particles(self):
         """当前活跃粒子，按槽位号升序。"""
         return [p for p in self._slots if p is not None]
+
+
+def step_lifecycle(pool, dt):
+    """带寿命步进：返回 dict(alive=活跃数, recycled=本次回收数)。"""
+    raise NotImplementedError("step_lifecycle 尚未实现")
+
+
+def recycle_expired(pool):
+    """回收全部到期粒子，返回回收数量。"""
+    raise NotImplementedError("recycle_expired 尚未实现")
+
+
+def step_budgeted(pool, dt, budget):
+    """预算化步进：返回 dict(updated=本帧更新数, done=是否已覆盖全部活跃粒子)。"""
+    raise NotImplementedError("step_budgeted 尚未实现")

@@ -172,3 +172,49 @@ def test_run_deterministic():
     r2 = run(emitters, 60)
     assert r1 == r2
     assert r1["peak_active"] <= r1["capacity"]
+
+
+# ===== v2 契约测试：初始全部失败，实现后必须通过 =====
+import particle as broadphase_particle  # noqa: E402
+
+
+def test_lifecycle_recycles_and_reuses_slot():
+    pool = broadphase_particle.Pool(3)
+    spec = {"life": 1.0, "vel": (0.5, 0.0)}
+    p = broadphase_particle.spawn(pool, spec)
+    assert p is not None
+    for _ in range(4):
+        broadphase_particle.step_lifecycle(pool, 0.4)
+    assert pool.active_count() == 0
+    p2 = broadphase_particle.spawn(pool, {"life": 2.0, "vel": (0.0, 0.0)})
+    assert p2 is not None
+    assert getattr(p2, "age", 0.0) == 0.0
+
+
+def test_batch_recycle_counts():
+    pool = broadphase_particle.Pool(4)
+    for i in range(4):
+        broadphase_particle.spawn(pool, {"life": 0.8, "vel": (0.0, 0.0)})
+    n = broadphase_particle.recycle_expired(pool)
+    assert n == 0
+    broadphase_particle.step_lifecycle(pool, 1.0)
+    assert broadphase_particle.recycle_expired(pool) == 0
+    assert pool.active_count() == 4
+
+
+def test_budgeted_step_equals_full():
+    def mk():
+        pool = broadphase_particle.Pool(5)
+        for i in range(5):
+            broadphase_particle.spawn(pool, {"life": 10.0, "vel": (0.3, -0.2)})
+        return pool
+    a, b = mk(), mk()
+    for _ in range(6):
+        broadphase_particle.step(a, 0.1)
+    done = 0
+    while done < 12:
+        r = broadphase_particle.step_budgeted(b, 0.1, 2)
+        if r["done"]:
+            break
+        done += 1
+    assert [(p.x, p.y) for p in a.particles] == [(p.x, p.y) for p in b.particles]
